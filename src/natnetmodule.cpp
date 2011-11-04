@@ -6,30 +6,32 @@
 PyObject *FrameOfMocapData;
 PyObject *RigidBodyData;
 
-void DataHandler(sFrameOfMocapData* data, void* pUserData) {
-    printf("Callback in C++\n");
-    PyObject *callback = (PyObject *)pUserData;
-    
+void DataHandler(sFrameOfMocapData *data, void *pUserData) {    
     PyGILState_STATE gstate = PyGILState_Ensure();
-
+	
+	PyObject *callback = (PyObject *)pUserData;
     PyObject *rigidBodies = PyList_New(0);
     for (int i = 0; i < data->nRigidBodies; i++) {
         sRigidBodyData body = data->RigidBodies[i];
         PyObject *rigidBodyArgs = Py_BuildValue("(ifffffff)", body.ID, body.x, body.y, body.z, body.qx, body.qy, body.qz, body.qw);
-        PyObject *rigidBody = PyInstance_New(RigidBodyData, rigidBodyArgs, PyDict_New());
-        PY_DECREF(rigidBodyArgs);
+		PyObject *dict = PyDict_New();
+        PyObject *rigidBody = PyInstance_New(RigidBodyData, rigidBodyArgs, dict);
+		Py_DECREF(dict);
+        Py_DECREF(rigidBodyArgs);
         PyList_Append(rigidBodies, rigidBody);
         Py_DECREF(rigidBody);
     }
     
-    PyObject *mocapDataArgs = Py_BuildValue("(iO)", data->iFrame, rigidBodies); 
-    PyObject *mocapInst = PyInstance_New(FrameOfMocapData, mocapDataArgs, PyDict_New());    
+    PyObject *mocapDataArgs = Py_BuildValue("(iO)", data->iFrame, rigidBodies);
+	PyObject *dict = PyDict_New();
+    PyObject *mocapInst = PyInstance_New(FrameOfMocapData, mocapDataArgs, dict);    
+	Py_DECREF(dict);
     PyObject *arglist = Py_BuildValue("(O)", mocapInst); 
     PyEval_CallObject(callback, arglist);
     Py_DECREF(arglist);
     Py_DECREF(mocapInst);
     Py_DECREF(mocapDataArgs);
-    Py_DECREF(rgidBodies);
+    Py_DECREF(rigidBodies);
     
     PyGILState_Release(gstate);
 }
@@ -39,7 +41,8 @@ PyObject *cnatnet_constructor(PyObject *self, PyObject *args) {
     if (!PyArg_ParseTuple(args, "i", &iType))
         return NULL;
     NatNetClient *inst = new NatNetClient(iType);    
-    return PyCObject_FromVoidPtr(inst, NULL);
+    PyObject *ret = PyCObject_FromVoidPtr(inst, NULL);
+	return ret;
 }
 
 PyObject *cnatnet_initialize(PyObject *self, PyObject *args) {
@@ -51,7 +54,10 @@ PyObject *cnatnet_initialize(PyObject *self, PyObject *args) {
     char szServerIPAddress[128] = {0};
     strncpy(szMyIPAddress, myIpAddress, 127);
     strncpy(szServerIPAddress, serverIpAddress, 127);
-    int ret = inst->Initialize(szMyIPAddress, szServerIPAddress);
+	int ret;
+	Py_BEGIN_ALLOW_THREADS
+    ret = inst->Initialize(szMyIPAddress, szServerIPAddress);
+	Py_END_ALLOW_THREADS
     return PyInt_FromLong(ret);
 }
 
@@ -102,8 +108,9 @@ PyMethodDef cnatnet_funcs[] = {
     {NULL, NULL, 0, NULL}    /* Sentinel */
 };
 
-PyMODINIT_FUNC initcnatnet(void) {
-    (void)Py_InitModule("cnatnet", cnatnet_funcs);
+PyMODINIT_FUNC initcnatnet() {
+    Py_InitModule("cnatnet", cnatnet_funcs);
+	PyEval_InitThreads();
     FrameOfMocapData = PyObject_GetAttrString(PyImport_ImportModule("NatNet.FrameOfMocapData"), "FrameOfMocapData");
     Py_INCREF(FrameOfMocapData);
     RigidBodyData = PyObject_GetAttrString(PyImport_ImportModule("NatNet.RigidBodyData"), "RigidBodyData");

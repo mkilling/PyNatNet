@@ -5,13 +5,13 @@ class NatNetClient:
         self.inst = cnatnet.constructor(iType)
     
     def NatNetVersion(self):
-        return cnatnet.natNetVersion(self)
+        return cnatnet.natNetVersion(self.inst)
     
     def SetMessageCallback(self, messageHandler):
         cnatnet.setMessageCallback(self, messageHandler)
     
     def SetVerbosityLevel(self, verbosityLevel):
-        pass
+        cnatnet.setVerbosityLevel(self.inst, verbosityLevel)
     
     def SetDataCallback(self, dataCallback):
         pass

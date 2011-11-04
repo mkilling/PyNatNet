@@ -33,6 +33,11 @@ PyObject *cnatnet_setMessageCallback(PyObject *self, PyObject *args) {
 }
 
 PyObject *cnatnet_setVerbosityLevel(PyObject *self, PyObject *args) {
+    PyObject *pyInst;
+    int level;
+    PyArg_ParseTuple(args, "Oi", &pyInst, &level);
+    NatNetClient *inst = (NatNetClient *)PyCObject_AsVoidPtr(pyInst);
+    inst->SetVerbosityLevel(level);
     Py_RETURN_NONE;
 }
 

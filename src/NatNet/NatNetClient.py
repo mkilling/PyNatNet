@@ -4,6 +4,9 @@ class NatNetClient:
 	def __init__(self, iType):
 		self.inst = cnatnet.constructor(iType)
 	
+	def NatNetVersion(self):
+		return cnatnet.natNetVersion(self)
+	
 	def SetMessageCallback(self, messageHandler):
 		pass
 	

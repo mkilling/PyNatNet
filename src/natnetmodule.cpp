@@ -30,10 +30,10 @@ void DataHandler(sFrameOfMocapData* data, void* pUserData) {
 }
 
 PyObject *cnatnet_constructor(PyObject *self, PyObject *args) {
-    int version;
-    if (!PyArg_ParseTuple(args, "i", &version))
+    int iType;
+    if (!PyArg_ParseTuple(args, "i", &iType))
         return NULL;
-    NatNetClient *inst = new NatNetClient(version);    
+    NatNetClient *inst = new NatNetClient(iType);    
     return PyCObject_FromVoidPtr(inst, NULL);
 }
 
@@ -42,7 +42,11 @@ PyObject *cnatnet_initialize(PyObject *self, PyObject *args) {
     char *myIpAddress, *serverIpAddress;
     PyArg_ParseTuple(args, "Oss", &pyInst, &myIpAddress, &serverIpAddress);
     NatNetClient *inst = (NatNetClient *)PyCObject_AsVoidPtr(pyInst);
-    int ret = inst->Initialize(myIpAddress, serverIpAddress);
+	char szMyIPAddress[128] = {0};
+    char szServerIPAddress[128] = {0};
+	strncpy(szMyIPAddress, myIpAddress, 127);
+	strncpy(szServerIPAddress, serverIpAddress, 127);
+	int ret = inst->Initialize(szMyIPAddress, szServerIPAddress);
     return PyInt_FromLong(ret);
 }
 

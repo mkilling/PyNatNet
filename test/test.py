@@ -3,12 +3,16 @@ import NatNet
 c = NatNet.NatNetClient(1)
 print c.NatNetVersion()
 
-c.SetVerbosityLevel(NatNet.Verbosity_Error)
+c.SetVerbosityLevel(NatNet.Verbosity_Info)
 
-c.Initialize("127.0.0.1", "127.0.0.1")
+c.Initialize("", "")
 
 
 def onData(dataFrame):
     print dataFrame
 
 c.SetDataCallback(onData)
+
+while True:
+    pass
+

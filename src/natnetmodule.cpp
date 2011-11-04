@@ -3,6 +3,12 @@
 #include <NatNetTypes.h>
 #include <NatNetClient.h>
 
+void DataHandler(sFrameOfMocapData* data, void* pUserData) {
+    PyObject *callback = (PyObject *)pUserData;
+    PyObject *arglist = Py_BuildValue("(O)", 
+    PyEval_CallObject(callback, arglist);
+}
+
 PyObject *cnatnet_constructor(PyObject *self, PyObject *args) {
     int version;
     if (!PyArg_ParseTuple(args, "i", &version))
@@ -12,7 +18,12 @@ PyObject *cnatnet_constructor(PyObject *self, PyObject *args) {
 }
 
 PyObject *cnatnet_initialize(PyObject *self, PyObject *args) {
-    Py_RETURN_NONE;
+    PyObject *pyInst;
+    char *myIpAddress, *serverIpAddress;
+    PyArg_ParseTuple(args, "Oss", &pyInst, &myIpAddress, &serverIpAddress);
+    NatNetClient *inst = (NatNetClient *)PyCObject_AsVoidPtr(pyInst);
+    int ret = inst->Initialize(myIpAddress, serverIpAddress);
+    return PyInt_FromLong(ret);
 }
 
 PyObject *cnatnet_natNetVersion(PyObject *self, PyObject *args) {
@@ -42,7 +53,12 @@ PyObject *cnatnet_setVerbosityLevel(PyObject *self, PyObject *args) {
 }
 
 PyObject *cnatnet_setDataCallback(PyObject *self, PyObject *args) {
-    Py_RETURN_NONE;
+    PyObject *pyInst;
+    PyObject *callback;
+    PyArg_ParseTuple(args, "OO", &pyInst, &callback);
+    Py_XINCREF(callback);
+    NatNetClient *inst = (NatNetClient *)PyCObject_AsVoidPtr(pyInst);
+    inst->SetDataCallback(DataHandler, callback);
 }
 
 PyMethodDef cnatnet_funcs[] = {

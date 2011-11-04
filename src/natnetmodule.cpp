@@ -7,6 +7,7 @@ PyObject *FrameOfMocapData;
 PyObject *RigidBodyData;
 
 void DataHandler(sFrameOfMocapData* data, void* pUserData) {
+    printf("Callback in C++\n");
     PyObject *callback = (PyObject *)pUserData;
     
     PyGILState_STATE gstate = PyGILState_Ensure();

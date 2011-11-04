@@ -6,3 +6,9 @@ print c.NatNetVersion()
 c.SetVerbosityLevel(NatNet.Verbosity_Error)
 
 c.Initialize("127.0.0.1", "127.0.0.1")
+
+
+def onData(dataFrame):
+    print dataFrame
+
+c.SetDataCallback(onData)

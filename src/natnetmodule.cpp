@@ -3,10 +3,29 @@
 #include <NatNetTypes.h>
 #include <NatNetClient.h>
 
+PyObject *FrameOfMocapData;
+PyObject *RigidBodyData;
+
 void DataHandler(sFrameOfMocapData* data, void* pUserData) {
     PyObject *callback = (PyObject *)pUserData;
-    PyObject *arglist = Py_BuildValue("(O)", 
+    
+    PyGILState_STATE gstate = PyGILState_Ensure();
+
+    PyObject *rigidBodies = PyList_New(0);
+    for (int i = 0; i < data->nRigidBodies; i++) {
+        sRigidBodyData body = data->RigidBodies[i];
+        PyObject *rigidBodyArgs = Py_BuildValue("(ifffffff)", body.ID, body.x, body.y, body.z, body.qx, body.qy, body.qz, body.qw);
+        PyObject *rigidBody = PyInstance_New(RigidBodyData, rigidBodyArgs, PyDict_New());
+        PyList_Append(rigidBodies, rigidBody);
+    }
+    
+    PyObject *mocapDataArgs = Py_BuildValue("(iO)", data->iFrame, rigidBodies); 
+    PyObject *mocapInst = PyInstance_New(FrameOfMocapData, mocapDataArgs, PyDict_New());
+    
+    PyObject *arglist = Py_BuildValue("(O)", mocapInst); 
     PyEval_CallObject(callback, arglist);
+    
+    PyGILState_Release(gstate);
 }
 
 PyObject *cnatnet_constructor(PyObject *self, PyObject *args) {
@@ -59,6 +78,7 @@ PyObject *cnatnet_setDataCallback(PyObject *self, PyObject *args) {
     Py_XINCREF(callback);
     NatNetClient *inst = (NatNetClient *)PyCObject_AsVoidPtr(pyInst);
     inst->SetDataCallback(DataHandler, callback);
+    Py_RETURN_NONE;
 }
 
 PyMethodDef cnatnet_funcs[] = {
@@ -74,4 +94,6 @@ PyMethodDef cnatnet_funcs[] = {
 
 PyMODINIT_FUNC initcnatnet(void) {
     (void)Py_InitModule("cnatnet", cnatnet_funcs);
+    FrameOfMocapData = PyObject_GetAttrString(PyImport_ImportModule("NatNet.FrameOfMocapData"), "FrameOfMocapData");
+    RigidBodyData = PyObject_GetAttrString(PyImport_ImportModule("NatNet.RigidBodyData"), "RigidBodyData");
 }

@@ -96,6 +96,9 @@ static PyObject *crank_compare_against_cards_to_come(PyObject *self, PyObject *a
 	return Py_BuildValue("(iii)", my_count, test_count, invalid_count);
 }
 
+
+
+
 static PyMethodDef crank_funcs[] = {
 	{"load_table",	crank_load_table, METH_VARARGS, "load the table"},
 	{"get_rank",  crank_get_rank, METH_VARARGS, "get the hand rank for a 7-element list of cards"},
@@ -103,6 +106,6 @@ static PyMethodDef crank_funcs[] = {
 	{NULL, NULL, 0, NULL}	/* Sentinel */
 };
 
-PyMODINIT_FUNC initcrank(void) {
-	(void)Py_InitModule("crank", crank_funcs);
+PyMODINIT_FUNC initnatnet(void) {
+	(void)Py_InitModule("natnet", natnet_funcs);
 }

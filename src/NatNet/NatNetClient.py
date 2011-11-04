@@ -8,7 +8,7 @@ class NatNetClient:
 		return cnatnet.natNetVersion(self)
 	
 	def SetMessageCallback(self, messageHandler):
-		pass
+		cnatnet.setMessageCallback(self, messageHandler)
 	
 	def SetVerbosityLevel(self, verbosityLevel):
 		pass

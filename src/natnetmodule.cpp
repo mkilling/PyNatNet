@@ -17,12 +17,17 @@ PyObject *cnatnet_natNetVersion(PyObject *self, PyObject *args) {
 	NatNetClient *inst = (NatNetClient *)PyCObject_AsVoidPtr(pyInst);
 	unsigned char ver[4];
 	inst->NatNetVersion(ver);
-	return PyString_FromFormat("%d.%d.%d.%d", ver[0], ver[1], ver[2], ver[3]);
+	return PyTuple_Pack(4, PyInt_FromSize_t(ver[0]), PyInt_FromSize_t(ver[1]), PyInt_FromSize_t(ver[2]), PyInt_FromSize_t(ver[3]));
+}
+
+PyObject *cnatnet_setMessageCallback(PyObject *self, PyObject *args) {
+	Py_RETURN_NONE;
 }
 
 PyMethodDef cnatnet_funcs[] = {
 	{"constructor", cnatnet_constructor, METH_VARARGS, "NatNetClient::NatNetClient"},
 	{"natNetVersion", cnatnet_natNetVersion, METH_VARARGS, "NatNetClient::NatNetVersion"},
+	{"setMessageCallback", cnatnet_setMessageCallback, METH_VARARGS, "NatNetClient::SetMessageCallback"},
 	{NULL, NULL, 0, NULL}	/* Sentinel */
 };
 

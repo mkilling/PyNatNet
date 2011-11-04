@@ -20,14 +20,14 @@ Usage
 # create unicast client
 client = NatNet.NatNetClient(1)
 # connect to localhost
-c.Initialize("", "")
+client.Initialize("", "")
 
 # create and register a callback function
 def onData(dataFrame):
     body = dataFrame.RigidBodies[0]
     print "x %.2f  y %.2f  z %.2f" % (body.x, body.y, body.z)
 
-c.SetDataCallback(onData)
+client.SetDataCallback(onData)
 
 # wait while data frames come in
 while True:

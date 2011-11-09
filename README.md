@@ -17,6 +17,8 @@ Usage
 -----
 
 ```python
+import NatNet
+
 # create unicast client
 client = NatNet.NatNetClient(1)
 # connect to localhost

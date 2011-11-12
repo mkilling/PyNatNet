@@ -25,7 +25,7 @@ void DataHandler(sFrameOfMocapData *data, void *pUserData) {
         Py_DECREF(rigidBody);
     }
 
-    PyObject *mocapDataArgs = Py_BuildValue("(iO)", data->iFrame, rigidBodies);
+    PyObject *mocapDataArgs = Py_BuildValue("(iOf)", data->iFrame, rigidBodies, data->fLatency);
     PyObject *dict = PyDict_New();
     PyObject *mocapInst = PyInstance_New(FrameOfMocapData, mocapDataArgs, dict);
     Py_DECREF(dict);

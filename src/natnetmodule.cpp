@@ -13,6 +13,8 @@ void DataHandler(sFrameOfMocapData *data, void *pUserData) {
     PyGILState_STATE gstate = PyGILState_Ensure();
 
     PyObject *callback = (PyObject *)pUserData;
+    if (!callback) return;
+
     PyObject *rigidBodies = PyList_New(0);
     for (int i = 0; i < data->nRigidBodies; i++) {
         sRigidBodyData body = data->RigidBodies[i];

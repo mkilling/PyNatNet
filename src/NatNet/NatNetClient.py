@@ -3,6 +3,9 @@ import cnatnet
 class NatNetClient:
     def __init__(self, iType):
         self.inst = cnatnet.constructor(iType)
+        self.lastFrame = None
+        self.dataCallback = None
+        cnatnet.setDataCallback(self.inst, self._callback)
 
     def NatNetVersion(self):
         return cnatnet.natNetVersion(self.inst)
@@ -14,7 +17,7 @@ class NatNetClient:
         cnatnet.setVerbosityLevel(self.inst, verbosityLevel)
 
     def SetDataCallback(self, dataCallback):
-        cnatnet.setDataCallback(self.inst, dataCallback)
+        self.dataCallback = dataCallback
 
     def Initialize(self, myIpAddress, serverIpAddress):
         print cnatnet.initialize(self.inst, myIpAddress, serverIpAddress)
@@ -24,3 +27,11 @@ class NatNetClient:
 
     def GetServerDescription(self):
         return cnatnet.getServerDescription(self.inst)
+
+    def GetLastFrameOfData(self):
+        return self.lastFrame
+
+    def _callback(self, dataFrame):
+        self.lastFrame = dataFrame
+        if self.dataCallback:
+            self.dataCallback(dataFrame)

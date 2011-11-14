@@ -53,7 +53,8 @@ PyObject *cnatnet_constructor(PyObject *self, PyObject *args) {
 PyObject *cnatnet_initialize(PyObject *self, PyObject *args) {
     PyObject *pyInst;
     char *myIpAddress, *serverIpAddress;
-    PyArg_ParseTuple(args, "Oss", &pyInst, &myIpAddress, &serverIpAddress);
+    int hostCommandPort, hostDataPort;
+    PyArg_ParseTuple(args, "Oss|ii", &pyInst, &myIpAddress, &serverIpAddress, &hostCommandPort, &hostDataPort);
     NatNetClient *inst = (NatNetClient *)PyCObject_AsVoidPtr(pyInst);
     char szMyIPAddress[128] = {0};
     char szServerIPAddress[128] = {0};
@@ -61,7 +62,17 @@ PyObject *cnatnet_initialize(PyObject *self, PyObject *args) {
     strncpy(szServerIPAddress, serverIpAddress, 127);
     int ret;
     Py_BEGIN_ALLOW_THREADS
-    ret = inst->Initialize(szMyIPAddress, szServerIPAddress);
+    switch (PyTuple_Size(args)) {
+        case 2:
+            ret = inst->Initialize(szMyIPAddress, szServerIPAddress);
+            break;
+        case 3:
+            ret = inst->Initialize(szMyIPAddress, szServerIPAddress, hostCommandPort);
+            break;
+        case 4:
+            ret = inst->Initialize(szMyIPAddress, szServerIPAddress, hostCommandPort, hostDataPort);
+            break;
+    }
     Py_END_ALLOW_THREADS
     return PyInt_FromLong(ret);
 }

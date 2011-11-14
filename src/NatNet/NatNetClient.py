@@ -10,6 +10,9 @@ class NatNetClient:
     def Initialize(self, myIpAddress, serverIpAddress):
         print cnatnet.initialize(self.inst, myIpAddress, serverIpAddress)
 
+    def Uninitialize(self):
+        return cnatnet.uninitialize(self.inst)
+
     def NatNetVersion(self):
         return cnatnet.natNetVersion(self.inst)
 

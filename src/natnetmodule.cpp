@@ -66,6 +66,14 @@ PyObject *cnatnet_initialize(PyObject *self, PyObject *args) {
     return PyInt_FromLong(ret);
 }
 
+PyObject *cnatnet_uninitialize(PyObject *self, PyObject *args) {
+    PyObject *pyInst;
+    PyArg_ParseTuple(args, "O", &pyInst);
+    NatNetClient *inst = (NatNetClient *)PyCObject_AsVoidPtr(pyInst);
+    int ret = inst->Uninitialize();
+    return PyInt_FromLong(ret);
+}
+
 PyObject *cnatnet_natNetVersion(PyObject *self, PyObject *args) {
     PyObject *pyInst;
     PyArg_ParseTuple(args, "O", &pyInst);
@@ -136,6 +144,7 @@ PyObject *cnatnet_setDataCallback(PyObject *self, PyObject *args) {
 PyMethodDef cnatnet_funcs[] = {
     {"constructor", cnatnet_constructor, METH_VARARGS, "NatNetClient::NatNetClient"},
     {"initialize", cnatnet_initialize, METH_VARARGS, "NatNetClient::Initialize"},
+    {"uninitialize", cnatnet_uninitialize, METH_VARARGS, "NatNetClient::Uninitialize"},
     {"natNetVersion", cnatnet_natNetVersion, METH_VARARGS, "NatNetClient::NatNetVersion"},
     {"getServerDescription", cnatnet_getServerDescription, METH_VARARGS, "NatNetClient::GetServerDescription"},
     {"getDataDescriptions", cnatnet_getDataDescriptions, METH_VARARGS, "NatNetClient::GetDataDescriptions"},

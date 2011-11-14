@@ -7,6 +7,9 @@ class NatNetClient:
         self.dataCallback = None
         cnatnet.setDataCallback(self.inst, self._callback)
 
+    def Initialize(self, myIpAddress, serverIpAddress):
+        print cnatnet.initialize(self.inst, myIpAddress, serverIpAddress)
+
     def NatNetVersion(self):
         return cnatnet.natNetVersion(self.inst)
 
@@ -18,9 +21,6 @@ class NatNetClient:
 
     def SetDataCallback(self, dataCallback):
         self.dataCallback = dataCallback
-
-    def Initialize(self, myIpAddress, serverIpAddress):
-        print cnatnet.initialize(self.inst, myIpAddress, serverIpAddress)
 
     def GetDataDescriptions(self):
         return cnatnet.getDataDescription(self.inst)

@@ -5,19 +5,15 @@
 
 PyObject *FrameOfMocapData;
 PyObject *RigidBodyData;
+PyObject *SkeletonData;
 PyObject *MarkerSetDescription;
 PyObject *RigidBodyDescription;
 PyObject *SkeletonDescription;
 
-void DataHandler(sFrameOfMocapData *data, void *pUserData) {
-    PyGILState_STATE gstate = PyGILState_Ensure();
-
-    PyObject *callback = (PyObject *)pUserData;
-    if (!callback) return;
-
+static PyObject *parseRigidBodies(sRigidBodyData *rigidBodyData, int nRigidBodies) {
     PyObject *rigidBodies = PyList_New(0);
-    for (int i = 0; i < data->nRigidBodies; i++) {
-        sRigidBodyData body = data->RigidBodies[i];
+    for (int i = 0; i < nRigidBodies; i++) {
+        sRigidBodyData body = rigidBodyData[i];
         PyObject *rigidBodyArgs = Py_BuildValue("(ifffffff)", body.ID, body.x, body.y, body.z, body.qx, body.qy, body.qz, body.qw);
         PyObject *dict = PyDict_New();
         PyObject *rigidBody = PyInstance_New(RigidBodyData, rigidBodyArgs, dict);
@@ -26,6 +22,34 @@ void DataHandler(sFrameOfMocapData *data, void *pUserData) {
         PyList_Append(rigidBodies, rigidBody);
         Py_DECREF(rigidBody);
     }
+    return rigidBodies;
+}
+
+static PyObject *parseSkeletons(sSkeletonData *skeletonData, int nSkeletons) {
+    PyObject *skeletons = PyList_New(0);
+    for (int i = 0; i < nSkeletons; i++) {
+        sSkeletonData skeleton = skeletonData[i];
+        PyObject *rigidBodies = parseRigidBodies(skeleton.RigidBodyData, skeleton.nRigidBodies);
+        PyObject *skeletonArgs = Py_BuildValue("(iO)", skeleton.skeletonID, rigidBodies);
+        PyObject *dict = PyDict_New();
+        PyObject *pySkeleton = PyInstance_New(SkeletonData, skeletonArgs, dict);
+        Py_DECREF(dict);
+        Py_DECREF(skeletonArgs);
+        PyList_Append(skeletons, pySkeleton);
+        Py_DECREF(rigidBodies);
+        Py_DECREF(pySkeleton);
+    }
+    return skeletons;
+}
+
+void DataHandler(sFrameOfMocapData *data, void *pUserData) {
+    PyGILState_STATE gstate = PyGILState_Ensure();
+
+    PyObject *callback = (PyObject *)pUserData;
+    if (!callback) return;
+
+    PyObject *rigidBodies = parseRigidBodies(data->RigidBodies, data->nRigidBodies);
+    PyObject *skeletons = parseSkeletons(data->Skeletons, data->nSkeletons);
 
     PyObject *mocapDataArgs = Py_BuildValue("(iOf)", data->iFrame, rigidBodies, data->fLatency);
     PyObject *dict = PyDict_New();
@@ -172,6 +196,8 @@ PyMODINIT_FUNC initcnatnet() {
     Py_INCREF(FrameOfMocapData);
     RigidBodyData = PyObject_GetAttrString(PyImport_ImportModule("NatNet.RigidBodyData"), "RigidBodyData");
     Py_INCREF(RigidBodyData);
+    SkeletonData = PyObject_GetAttrString(PyImport_ImportModule("NatNet.SkeletonData"), "SkeletonBodyData");
+    Py_INCREF(SkeletonData);
 
     PyObject *descriptionModule = PyImport_ImportModule("NatNet.DataDescription");
     MarkerSetDescription = PyObject_GetAttrString(descriptionModule, "MarkerSetDescription");

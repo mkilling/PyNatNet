@@ -41,7 +41,7 @@ Caveats
 
 At the moment, the following caveats apply:
 
-* The wrapper only works for rigid bodies. Most fields of sFrameOfMocapData are currently not exposed to Python.
+* MarkerSets are not exposed to Python
 * You cannot register message callbacks via NatNetClient::SetMessageCallback()
 * You cannot query for the server description via NatNetClient::GetServerDescription()
 

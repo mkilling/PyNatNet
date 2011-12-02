@@ -51,14 +51,14 @@ void DataHandler(sFrameOfMocapData *data, void *pUserData) {
     PyObject *rigidBodies = parseRigidBodies(data->RigidBodies, data->nRigidBodies);
     PyObject *skeletons = parseSkeletons(data->Skeletons, data->nSkeletons);
 
-    PyObject *mocapDataArgs = Py_BuildValue("(iOf)", data->iFrame, rigidBodies, data->fLatency);
+    PyObject *mocapDataArgs = Py_BuildValue("(iOOf)", data->iFrame, rigidBodies, skeletons, data->fLatency);
     PyObject *dict = PyDict_New();
     PyObject *mocapInst = PyInstance_New(FrameOfMocapData, mocapDataArgs, dict);
     Py_DECREF(dict);
     PyObject *arglist = Py_BuildValue("(O)", mocapInst);
     PyEval_CallObject(callback, arglist);
-    Py_DECREF(arglist);
-    Py_DECREF(mocapInst);
+    //Py_DECREF(arglist);
+    //Py_DECREF(mocapInst);
     Py_DECREF(mocapDataArgs);
     Py_DECREF(rigidBodies);
 
@@ -87,15 +87,18 @@ PyObject *cnatnet_initialize(PyObject *self, PyObject *args) {
     int ret;
     Py_BEGIN_ALLOW_THREADS
     switch (PyTuple_Size(args)) {
-        case 2:
+        case 3:
             ret = inst->Initialize(szMyIPAddress, szServerIPAddress);
             break;
-        case 3:
+        case 4:
             ret = inst->Initialize(szMyIPAddress, szServerIPAddress, hostCommandPort);
             break;
-        case 4:
+        case 5:
             ret = inst->Initialize(szMyIPAddress, szServerIPAddress, hostCommandPort, hostDataPort);
             break;
+        default:
+            printf("fail, %d args\n", PyTuple_Size(args));
+            ret = 1;
     }
     Py_END_ALLOW_THREADS
     return PyInt_FromLong(ret);
@@ -196,7 +199,7 @@ PyMODINIT_FUNC initcnatnet() {
     Py_INCREF(FrameOfMocapData);
     RigidBodyData = PyObject_GetAttrString(PyImport_ImportModule("NatNet.RigidBodyData"), "RigidBodyData");
     Py_INCREF(RigidBodyData);
-    SkeletonData = PyObject_GetAttrString(PyImport_ImportModule("NatNet.SkeletonData"), "SkeletonBodyData");
+    SkeletonData = PyObject_GetAttrString(PyImport_ImportModule("NatNet.SkeletonData"), "SkeletonData");
     Py_INCREF(SkeletonData);
 
     PyObject *descriptionModule = PyImport_ImportModule("NatNet.DataDescription");

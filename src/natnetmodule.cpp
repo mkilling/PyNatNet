@@ -57,10 +57,11 @@ void DataHandler(sFrameOfMocapData *data, void *pUserData) {
     Py_DECREF(dict);
     PyObject *arglist = Py_BuildValue("(O)", mocapInst);
     PyEval_CallObject(callback, arglist);
-    //Py_DECREF(arglist);
-    //Py_DECREF(mocapInst);
+    Py_DECREF(arglist);
+    Py_DECREF(mocapInst);
     Py_DECREF(mocapDataArgs);
     Py_DECREF(rigidBodies);
+    Py_DECREF(skeletons);
 
     PyGILState_Release(gstate);
 }
